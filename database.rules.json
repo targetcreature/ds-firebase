@@ -1,0 +1,20 @@
+{
+  "rules": {
+    "$room_id": {
+      ".write": "auth.uid === root.child('public/owner').val() || root.child('public/owner').val() === null",
+      ".read": "auth.uid === root.child('public/owner').val() || root.child('public/owner').val() === null",
+      "publicData": {
+        ".read": true,
+        "$uid": {
+          ".write": "auth.uid === $uid"
+        }
+      },
+      "privateData": {
+        "$uid": {
+          ".read": "auth.uid === $uid",
+          ".write": "auth.uid === $uid"
+        }
+      }
+    }
+  }
+}
