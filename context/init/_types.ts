@@ -1,18 +1,20 @@
 export type State = {
-    publicData: {
-        owner: string,
-        game: {
-            round: number,
-            turn: number
-        },
-        players: Record<string, {
-            name: string,
-            score: 0,
-            isReady: false
-        }>
-    },
-    privateData: Record<string, {
-        submission: "",
-        vote: 0
+    game: Game,
+    owner: string,
+    players: Record<string, Player>
+}
+
+export type Game = {
+    round: number,
+    turn: number,
+    submissions: Record<string, {
+        data: string
+        votes: string[]
     }>
+}
+
+export type Player = {
+    name: string,
+    score: 0,
+    isReady: false
 }

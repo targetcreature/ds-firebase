@@ -1,24 +1,23 @@
 import { State } from "./_types"
 
-export const initState = (uid: string, name: string): State => ({
-    publicData: {
-        game: {
-            round: 0,
-            turn: 0
-        },
-        owner: uid,
-        players: {
-            [uid]: {
-                name,
-                isReady: false,
-                score: 0
-            }
-        }
-    },
-    privateData: {
+export const initState: State = {
+    owner: null,
+    players: {},
+    game: {
+        round: 0,
+        turn: 0,
+        submissions: {}
+    }
+}
+
+export const newState = (uid: string, name: string): State => ({
+    ...initState,
+    owner: uid,
+    players: {
         [uid]: {
-            submission: "",
-            vote: 0
+            name,
+            isReady: false,
+            score: 0
         }
     }
 })
