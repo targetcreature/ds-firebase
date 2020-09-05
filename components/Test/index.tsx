@@ -9,9 +9,10 @@ export const Test: React.FC = () => {
             <div>Test</div>
             <button type="button" onClick={() => {
                 produce((draft, uid) => {
-                    draft.players[uid].name = "Tommy"
+                    draft.game.round = 5
+                    draft.players[uid].name = "Dommy"
                     return draft
-                }, (err) => err && console.log(err))
+                })
             }}>UPDATE</button>
         </div>
     )

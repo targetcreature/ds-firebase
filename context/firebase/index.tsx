@@ -86,9 +86,12 @@ export const FirebaseProvider: React.FC<Props> = ({ path, children }) => {
 
 export const useSetData = () => {
     const { ref, uid } = useContext(RefCTX)
-    return (cb: (draft: State, uid: string) => State, onComplete?: (err: Error) => void) => {
+    return (cb: (draft: State, uid: string) => State, onComplete?: () => void) => {
         ref.transaction((state) => {
             return cb(state, uid)
-        }, (err) => onComplete(err))
+        }, (err) => {
+            if (err) throw err
+            onComplete()
+        })
     }
 }
