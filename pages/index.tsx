@@ -1,4 +1,3 @@
-import { Test } from "../components/Test"
 
 type Props = {
     roomId: string
@@ -7,7 +6,8 @@ type Props = {
 const App: React.FC = () => {
 
     return (
-        <Test />
+        <div>index</div>
+        // <Test />
     )
 
 }

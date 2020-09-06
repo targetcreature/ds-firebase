@@ -1,0 +1,11 @@
+{
+    "rules": {
+        "$room_id": {
+            ".read": true,
+            ".write": "auth.uid === root.child('owner').val() || root.child('owner').val() === null",
+            "$uid": {
+                ".write": "auth.uid === $uid"
+            }
+        }
+    }
+}

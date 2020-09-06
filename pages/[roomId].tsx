@@ -1,4 +1,4 @@
-import { Test } from "../components/Test"
+import { useData } from "./_app"
 
 type Props = {
     roomId: string
@@ -6,8 +6,13 @@ type Props = {
 
 const App: React.FC = () => {
 
+    const data = useData()
+
+    console.log({ data })
+
     return (
-        <Test />
+        <div>room</div>
+        // <Test />
     )
 
 }
