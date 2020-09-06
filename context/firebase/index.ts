@@ -1,20 +1,42 @@
 import { createContext, useContext } from 'react'
 import { _provider } from './_provider'
 
+
+type Props<G, P> = {
+    config: Object,
+    initGame: G,
+    initPlayer: P,
+    Loading?: React.FC
+}
+
+type State<G, P> = {
+    game: G,
+    owner: string
+    players: Record<string, P>
+}
+
 type UseFirebase<T> = [
     React.FC,
     () => T,
     (cb: (draft: T, uid: string) => T, onComplete?: () => void) => void
 ]
 
-export const useFirebase = <T>(config: Object, init: T, Loading?: React.FC): UseFirebase<T> => {
+export const useFirebase = <G, P>(props: Props<G, P>): UseFirebase<State<G, P>> => {
 
-    const DataCTX = createContext<T>(init)
+    const { config, initGame, initPlayer, Loading } = props
+
+    const init: State<G, P> = {
+        game: initGame,
+        owner: null,
+        players: {}
+    }
+
+    const DataCTX = createContext(init)
     const FireCTX = createContext<{ uid: string, DB: firebase.database.Reference }>(null)
 
     const useDB = () => {
         const { DB, uid } = useContext(FireCTX)
-        return (cb: (draft: T, uid: string) => T, onComplete?: () => void) => {
+        return (cb: (draft: State<G, P>, uid: string) => State<G, P>, onComplete?: () => void) => {
             DB.transaction((state) => {
                 return cb(state, uid)
             }, (err) => {

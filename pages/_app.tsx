@@ -13,13 +13,18 @@ const config = {
   measurementId: "G-Z77TJW01CZ"
 }
 
-const init = {
-  fart: "machine"
+const initGame = {
+  round: 0,
+  turn: 0
+}
+const initPlayer = {
+  submission: "",
+  vote: 0
 }
 
 const Loading: React.FC = () => <div>Loading...</div>
 
-const [FirebaseProvider, useData, useDB] = useFirebase(config, init, Loading)
+const [FirebaseProvider, useData, useDB] = useFirebase({ config, initGame, initPlayer, Loading })
 
 export { useData, useDB }
 
