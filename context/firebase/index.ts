@@ -28,7 +28,9 @@ export const useFirebase = <G, P>(props: Props<G, P>): UseFirebase<State<G, P>> 
     const init: State<G, P> = {
         game: initGame,
         owner: null,
-        players: {}
+        players: {
+            init: initPlayer
+        }
     }
 
     const DataCTX = createContext(init)
@@ -46,12 +48,24 @@ export const useFirebase = <G, P>(props: Props<G, P>): UseFirebase<State<G, P>> 
         }
     }
 
+    const usePlayer = () => {
+        const { DB, uid } = useContext(FireCTX)
+        return (cb: (draft: State<G, P>, uid: string) => State<G, P>, onComplete?: () => void) => {
+            DB.child(`players/${uid}`).transaction((state) => {
+                return cb(state, uid)
+            }, (err) => {
+                if (err) throw err
+                onComplete && onComplete()
+            })
+        }
+    }
+
     const useData = () => useContext(DataCTX)
 
     const Provider = _provider({ config, init, DataCTX, FireCTX, Loading })
 
     return [
-        Provider, useData, useDB
+        Provider, useData, usePlayer
     ]
 
 }

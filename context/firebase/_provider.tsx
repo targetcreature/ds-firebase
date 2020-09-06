@@ -5,8 +5,14 @@ import { useRouter } from "next/router"
 import { Context, useCallback, useEffect, useState } from "react"
 
 type Props = {
-    config: Object,
-    init: any,
+    config: Object
+    init: {
+        game: any
+        owner: string
+        players: {
+            init?: any
+        }
+    },
     DataCTX: Context<any>
     FireCTX: Context<any>
     Loading: React.FC
@@ -19,6 +25,8 @@ export const _provider = ({ config, init, DataCTX, FireCTX, Loading = () => null
     const [data, setData] = useState(null)
 
     const router = useRouter()
+
+    console.log({ uid })
 
     useEffect(() => {
         if (!firebase.apps.length) {
@@ -39,7 +47,21 @@ export const _provider = ({ config, init, DataCTX, FireCTX, Loading = () => null
             firebase.auth().onAuthStateChanged(user => {
                 if (user) {
                     const { uid } = user
-                    DB.on("value", snap => setData(snap.val()), err => err && console.log(err))
+                    DB.on("value", snap => {
+                        const data = snap.val()
+                        if (!data) {
+                            DB.set({
+                                ...init,
+                                owner: uid,
+                                players: {
+                                    [uid]: init.players.init
+                                }
+                            })
+                        }
+                        else {
+                            setData(snap.val())
+                        }
+                    }, err => err && console.log(err))
                     setUID(uid)
                     setDB(DB)
                 }
