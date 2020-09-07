@@ -1,5 +1,6 @@
 import { useRouter } from "next/router"
 import { Context, useCallback, useEffect, useMemo, useState } from "react"
+import { FireCTX } from ".."
 
 type Props = {
     AUTH: firebase.auth.Auth
@@ -12,7 +13,7 @@ type Props = {
         }
     },
     DataCTX: Context<any>
-    FireCTX: Context<any>
+    FireCTX: Context<FireCTX>
     Loading: React.FC
 }
 
@@ -35,10 +36,7 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
 
     const router = useRouter()
 
-    console.log({ uid })
-
     const isOwner = useMemo(() => !!owner && owner === uid, [owner, uid])
-    console.log({ isOwner })
 
     useEffect(() => {
 
@@ -95,7 +93,7 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
 
 
     return !data ? <Loading /> : (
-        <FireCTX.Provider value={{ uid, Ref }}>
+        <FireCTX.Provider value={{ uid, Ref, isOwner }}>
             <DataCTX.Provider value={data}>
                 {children}
             </DataCTX.Provider>

@@ -19,7 +19,8 @@ const initGame = {
 }
 const initPlayer = {
   submission: "",
-  vote: 0
+  vote: 0,
+  name: ""
 }
 
 const Loading: React.FC = () => <div>Loading...</div>
