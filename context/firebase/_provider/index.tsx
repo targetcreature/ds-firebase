@@ -1,11 +1,9 @@
-import firebase from 'firebase/app'
-import 'firebase/auth' // If you need it
-import 'firebase/database' // If you need it
 import { useRouter } from "next/router"
 import { Context, useCallback, useEffect, useMemo, useState } from "react"
 
 type Props = {
-    config: Object
+    AUTH: firebase.auth.Auth
+    DB: firebase.database.Database
     init: {
         game: any
         owner: string
@@ -18,9 +16,18 @@ type Props = {
     Loading: React.FC
 }
 
-export const _provider = ({ config, init, DataCTX, FireCTX, Loading = () => null }: Props): React.FC => ({ children }) => {
+export const _provider = (props: Props): React.FC => ({ children }) => {
 
-    const [DB, setDB] = useState<firebase.database.Reference>(null)
+    const {
+        AUTH,
+        DB,
+        init,
+        DataCTX,
+        FireCTX,
+        Loading = () => null
+    } = props
+
+    const [Ref, setRef] = useState<firebase.database.Reference>(null)
     const [uid, setUID] = useState<string>(null)
     const [data, setData] = useState(null)
     const [joined, setJoined] = useState(false)
@@ -34,25 +41,16 @@ export const _provider = ({ config, init, DataCTX, FireCTX, Loading = () => null
     console.log({ isOwner })
 
     useEffect(() => {
-        if (!firebase.apps.length) {
-            firebase.initializeApp(config)
-            firebase.auth().signInAnonymously().catch((error) => {
-                console.log("ERROR: ", error)
-            })
-        }
-    }, [])
-
-    useEffect(() => {
 
         if (router.asPath !== router.route) {
 
             const [room] = Object.values(router.query)
-            const DB = firebase.database().ref(room as string)
+            const Ref = DB.ref(room as string)
 
-            firebase.auth().onAuthStateChanged(user => {
+            AUTH.onAuthStateChanged(user => {
                 if (user) {
                     const { uid } = user
-                    DB.on("value", snap => {
+                    Ref.on("value", snap => {
                         const data = snap.val()
                         if (!data) {
                             const initData = {
@@ -62,7 +60,7 @@ export const _provider = ({ config, init, DataCTX, FireCTX, Loading = () => null
                                     [uid]: init.players.init
                                 }
                             }
-                            DB.set(initData)
+                            Ref.set(initData)
                             setData(initData)
                         }
                         else {
@@ -70,14 +68,14 @@ export const _provider = ({ config, init, DataCTX, FireCTX, Loading = () => null
                             setData(data)
                             if (!joined) {
                                 setJoined(true)
-                                DB.child("players").update({
+                                Ref.child("players").update({
                                     [uid]: init.players.init
                                 }, err => err && console.log(err))
                             }
                         }
                     }, err => err && console.log(err))
                     setUID(uid)
-                    setDB(DB)
+                    setRef(Ref)
                 }
             }, err => err && console.log(err))
         }
@@ -91,13 +89,13 @@ export const _provider = ({ config, init, DataCTX, FireCTX, Loading = () => null
     useEffect(() => {
         window.onbeforeunload = () => {
             onExit()
-            firebase.auth().signOut()
+            AUTH.signOut()
         }
     }, [onExit])
 
 
     return !data ? <Loading /> : (
-        <FireCTX.Provider value={{ uid, DB }}>
+        <FireCTX.Provider value={{ uid, Ref }}>
             <DataCTX.Provider value={data}>
                 {children}
             </DataCTX.Provider>

@@ -1,4 +1,5 @@
 import { createContext, useContext } from 'react'
+import { initializeFirebase } from './bin/initializeFirebase'
 import { _provider } from './_provider'
 
 
@@ -36,6 +37,8 @@ export const useFirebase = <G, P>(props: Props<G, P>): UseFirebase<State<G, P>> 
     const DataCTX = createContext(init)
     const FireCTX = createContext<{ uid: string, DB: firebase.database.Reference }>(null)
 
+    const { AUTH, DB } = initializeFirebase(config)
+
     const useDB = () => {
         const { DB, uid } = useContext(FireCTX)
         return (cb: (draft: State<G, P>, uid: string) => State<G, P>, onComplete?: () => void) => {
@@ -62,7 +65,14 @@ export const useFirebase = <G, P>(props: Props<G, P>): UseFirebase<State<G, P>> 
 
     const useData = () => useContext(DataCTX)
 
-    const Provider = _provider({ config, init, DataCTX, FireCTX, Loading })
+    const Provider = _provider({
+        AUTH,
+        DB,
+        init,
+        DataCTX,
+        FireCTX,
+        Loading
+    })
 
     return [
         Provider, useData, usePlayer
