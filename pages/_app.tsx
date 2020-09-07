@@ -25,9 +25,9 @@ const initPlayer = {
 
 const Loading: React.FC = () => <div>Loading...</div>
 
-const [FirebaseProvider, useData, useDB] = useFirebase({ config, initGame, initPlayer, Loading })
+const [FirebaseProvider, useRoom, useSet] = useFirebase({ config, initGame, initPlayer, Loading })
 
-export { useData, useDB }
+export { useRoom, useSet }
 
 export default function App({ Component, pageProps }) {
 

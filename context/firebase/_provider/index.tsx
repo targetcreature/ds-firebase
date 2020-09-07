@@ -31,7 +31,6 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
     const [Ref, setRef] = useState<firebase.database.Reference>(null)
     const [uid, setUID] = useState<string>(null)
     const [data, setData] = useState(null)
-    const [joined, setJoined] = useState(false)
     const [owner, setOwner] = useState(null)
 
     const router = useRouter()
@@ -62,14 +61,12 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
                             setData(initData)
                         }
                         else {
+                            if (!data.players[uid]) {
+                                Ref.child(`players/${uid}`).set(init.players.init, err => err && console.log(err))
+                                data.players[uid] = init.players.init
+                            }
                             setOwner(data.owner)
                             setData(data)
-                            if (!joined) {
-                                setJoined(true)
-                                Ref.child("players").update({
-                                    [uid]: init.players.init
-                                }, err => err && console.log(err))
-                            }
                         }
                     }, err => err && console.log(err))
                     setUID(uid)

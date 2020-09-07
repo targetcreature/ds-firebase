@@ -15,10 +15,19 @@ type State<G, P> = {
     players: Record<string, P>
 }
 
-type UseFirebase<T> = [
+interface UseRoom<G, P> extends State<G, P> {
+    my: P
+}
+
+interface UseSet<G, P> {
+    game: (cb: (draft: State<G, P>) => State<G, P>, onComplete?: () => void) => void
+    my: (cb: (draft: P) => P, onComplete?: () => void) => void
+}
+
+type UseFirebase<G, P> = [
     React.FC,
-    () => T,
-    (cb: (draft: T, uid: string) => T, onComplete?: () => void) => void
+    () => UseRoom<G, P>,
+    () => UseSet<G, P>
 ]
 
 export type FireCTX = {
@@ -27,7 +36,7 @@ export type FireCTX = {
     isOwner: boolean
 }
 
-export const useFirebase = <G, P>(props: Props<G, P>): UseFirebase<State<G, P>> => {
+export const useFirebase = <G, P>(props: Props<G, P>): UseFirebase<G, P> => {
 
     const { config, initGame, initPlayer, Loading } = props
 
@@ -44,7 +53,16 @@ export const useFirebase = <G, P>(props: Props<G, P>): UseFirebase<State<G, P>> 
 
     const { AUTH, DB } = initializeFirebase(config)
 
-    const useSetRoom = () => {
+    const useRoom = () => {
+        const { uid } = useContext(FireCTX)
+        const data = useContext(DataCTX)
+        return {
+            ...data,
+            my: data.players[uid]
+        }
+    }
+
+    const useSet = () => {
         const { Ref, uid, isOwner } = useContext(FireCTX)
         return {
             game: (cb: (draft: State<G, P>) => State<G, P>, onComplete?: () => void) => {
@@ -57,7 +75,7 @@ export const useFirebase = <G, P>(props: Props<G, P>): UseFirebase<State<G, P>> 
                     })
                 }
             },
-            player: (cb: (draft: State<G, P>) => State<G, P>, onComplete?: () => void) => {
+            my: (cb: (draft: P) => P, onComplete?: () => void) => {
                 Ref.child(`players/${uid}`).transaction((state) => {
                     return cb(state)
                 }, (err) => {
@@ -66,31 +84,7 @@ export const useFirebase = <G, P>(props: Props<G, P>): UseFirebase<State<G, P>> 
                 })
             }
         }
-        // return (cb: (draft: State<G, P>, uid: string) => State<G, P>, onComplete?: () => void) => {
-        //     if (isOwner) {
-        //         Ref.transaction((state) => {
-        //             return cb(state, uid)
-        //         }, (err) => {
-        //             if (err) throw err
-        //             onComplete && onComplete()
-        //         })
-        //     }
-        // }
     }
-
-    // const usePlayer = () => {
-    //     const { Ref, uid } = useContext(FireCTX)
-    //     return (cb: (draft: State<G, P>, uid: string) => State<G, P>, onComplete?: () => void) => {
-    //         Ref.child(`players/${uid}`).transaction((state) => {
-    //             return cb(state, uid)
-    //         }, (err) => {
-    //             if (err) throw err
-    //             onComplete && onComplete()
-    //         })
-    //     }
-    // }
-
-    const useRoom = () => useContext(DataCTX)
 
     const Provider = _provider({
         AUTH,
@@ -102,7 +96,7 @@ export const useFirebase = <G, P>(props: Props<G, P>): UseFirebase<State<G, P>> 
     })
 
     return [
-        Provider, useRoom, useSetRoom
+        Provider, useRoom, useSet
     ]
 
 }
