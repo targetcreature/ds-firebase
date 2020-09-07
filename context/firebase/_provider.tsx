@@ -2,7 +2,7 @@ import firebase from 'firebase/app'
 import 'firebase/auth' // If you need it
 import 'firebase/database' // If you need it
 import { useRouter } from "next/router"
-import { Context, useCallback, useEffect, useState } from "react"
+import { Context, useCallback, useEffect, useMemo, useState } from "react"
 
 type Props = {
     config: Object
@@ -23,10 +23,15 @@ export const _provider = ({ config, init, DataCTX, FireCTX, Loading = () => null
     const [DB, setDB] = useState<firebase.database.Reference>(null)
     const [uid, setUID] = useState<string>(null)
     const [data, setData] = useState(null)
+    const [joined, setJoined] = useState(false)
+    const [owner, setOwner] = useState(null)
 
     const router = useRouter()
 
     console.log({ uid })
+
+    const isOwner = useMemo(() => !!owner && owner === uid, [owner, uid])
+    console.log({ isOwner })
 
     useEffect(() => {
         if (!firebase.apps.length) {
@@ -50,16 +55,25 @@ export const _provider = ({ config, init, DataCTX, FireCTX, Loading = () => null
                     DB.on("value", snap => {
                         const data = snap.val()
                         if (!data) {
-                            DB.set({
+                            const initData = {
                                 ...init,
                                 owner: uid,
                                 players: {
                                     [uid]: init.players.init
                                 }
-                            })
+                            }
+                            DB.set(initData)
+                            setData(initData)
                         }
                         else {
-                            setData(snap.val())
+                            setOwner(data.owner)
+                            setData(data)
+                            if (!joined) {
+                                setJoined(true)
+                                DB.child("players").update({
+                                    [uid]: init.players.init
+                                }, err => err && console.log(err))
+                            }
                         }
                     }, err => err && console.log(err))
                     setUID(uid)
@@ -78,9 +92,9 @@ export const _provider = ({ config, init, DataCTX, FireCTX, Loading = () => null
         window.onbeforeunload = () => {
             onExit()
             firebase.auth().signOut()
-            console.log("window closed")
         }
     }, [onExit])
+
 
     return !data ? <Loading /> : (
         <FireCTX.Provider value={{ uid, DB }}>
