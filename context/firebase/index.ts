@@ -68,18 +68,14 @@ export const useFirebase = <G, P>(props: Props<G, P>): UseFirebase<G, P> => {
         return {
             game: <K extends keyof G>(key: K, cb: (draft: G[K]) => G[K], onComplete?: () => void) => {
                 if (isOwner) {
-                    Ref.child(`game/${key}`).transaction((state) => {
-                        return cb(state)
-                    }, (err) => {
+                    Ref.child(`game/${key}`).transaction((d) => cb(d), (err) => {
                         if (err) throw err
                         onComplete && onComplete()
                     })
                 }
             },
             my: <K extends keyof P>(key: K, cb: (draft: P[K]) => P[K], onComplete?: () => void) => {
-                Ref.child(`players/${uid}/${key}`).transaction((state) => {
-                    return cb(state)
-                }, (err) => {
+                Ref.child(`players/${uid}/${key}`).transaction((d) => cb(d), (err) => {
                     if (err) throw err
                     onComplete && onComplete()
                 })
