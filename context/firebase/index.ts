@@ -20,8 +20,9 @@ interface UseRoom<G, P> extends State<G, P> {
 }
 
 interface UseSet<G, P> {
-    game: (cb: (draft: State<G, P>) => State<G, P>, onComplete?: () => void) => void
-    my: (cb: (draft: P) => P, onComplete?: () => void) => void
+    // game: (cb: (draft: State<G, P>) => State<G, P>, onComplete?: () => void) => void
+    game: <K extends keyof G>(key: K, cb: (draft: G[K]) => G[K], onComplete?: () => void) => void
+    my: <K extends keyof P>(key: K, cb: (draft: P[K]) => P[K], onComplete?: () => void) => void
 }
 
 type UseFirebase<G, P> = [
@@ -62,12 +63,12 @@ export const useFirebase = <G, P>(props: Props<G, P>): UseFirebase<G, P> => {
         }
     }
 
-    const useSet = () => {
+    const useSet = (): UseSet<G, P> => {
         const { Ref, uid, isOwner } = useContext(FireCTX)
         return {
-            game: (cb: (draft: State<G, P>) => State<G, P>, onComplete?: () => void) => {
+            game: <K extends keyof G>(key: K, cb: (draft: G[K]) => G[K], onComplete?: () => void) => {
                 if (isOwner) {
-                    Ref.transaction((state) => {
+                    Ref.child(`game/${key}`).transaction((state) => {
                         return cb(state)
                     }, (err) => {
                         if (err) throw err
@@ -75,8 +76,8 @@ export const useFirebase = <G, P>(props: Props<G, P>): UseFirebase<G, P> => {
                     })
                 }
             },
-            my: (cb: (draft: P) => P, onComplete?: () => void) => {
-                Ref.child(`players/${uid}`).transaction((state) => {
+            my: <K extends keyof P>(key: K, cb: (draft: P[K]) => P[K], onComplete?: () => void) => {
+                Ref.child(`players/${uid}/${key}`).transaction((state) => {
                     return cb(state)
                 }, (err) => {
                     if (err) throw err

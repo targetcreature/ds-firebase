@@ -6,18 +6,15 @@ type Props = {
 
 const App: React.FC = () => {
 
-    const data = useRoom()
+    const { my, game } = useRoom()
     const set = useSet()
-
-    console.log({ data })
 
     return (
         <div>
-            <div>{data.my?.name || "No Name"}</div>
-            <button type="button" onClick={() => set.my((draft) => {
-                draft.name = "Larry"
-                return draft
-            })}>Larrify</button>
+            <div>Name: {my.name || "No Name"}</div>
+            <div>Round: {game.round}</div>
+            <button type="button" onClick={() => set.my("name", (name) => "Jibb")}>Nameify</button>
+            <button type="button" onClick={() => set.game("round", (n) => n + 1)}>Gameify</button>
         </div>
         // <Test />
     )
