@@ -16,7 +16,6 @@ const App: React.FC = () => {
             <button type="button" onClick={() => set.my("name", (name) => "Jibb")}>Nameify</button>
             <button type="button" onClick={() => set.game("round", (n) => n + 1)}>Gameify</button>
         </div>
-        // <Test />
     )
 
 }

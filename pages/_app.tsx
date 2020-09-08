@@ -1,6 +1,4 @@
 import { useFirebase } from "../context/firebase"
-// import { FirebaseProvider } from "../context/firebase/provider"
-import "../styles/_.scss"
 
 const config = {
   apiKey: "AIzaSyDZFlZLzy-3RChsZ09-oDkrym60wPS8FxY",
@@ -13,19 +11,21 @@ const config = {
   measurementId: "G-Z77TJW01CZ"
 }
 
-const initGame = {
-  round: 0,
-  turn: 0
-}
-const initPlayer = {
-  submission: "",
-  vote: 0,
-  name: ""
+const init = {
+  game: {
+    round: 0,
+    turn: 0
+  },
+  player: {
+    submission: "",
+    vote: 0,
+    name: ""
+  }
 }
 
 const Loading: React.FC = () => <div>Loading...</div>
 
-const [FirebaseProvider, useRoom, useSet] = useFirebase({ config, initGame, initPlayer, Loading })
+const [FirebaseProvider, useRoom, useSet] = useFirebase({ config, init, Loading })
 
 export { useRoom, useSet }
 

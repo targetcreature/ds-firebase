@@ -3,9 +3,11 @@ import { initializeFirebase } from './bin/initializeFirebase'
 import { _provider } from './_provider'
 
 type Props<G, P> = {
-    config: Object,
-    initGame: G,
-    initPlayer: P,
+    config: Object
+    init: {
+        game: G,
+        player: P,
+    }
     Loading?: React.FC
 }
 
@@ -20,7 +22,6 @@ interface UseRoom<G, P> extends State<G, P> {
 }
 
 interface UseSet<G, P> {
-    // game: (cb: (draft: State<G, P>) => State<G, P>, onComplete?: () => void) => void
     game: <K extends keyof G>(key: K, cb: (draft: G[K]) => G[K], onComplete?: () => void) => void
     my: <K extends keyof P>(key: K, cb: (draft: P[K]) => P[K], onComplete?: () => void) => void
 }
@@ -39,13 +40,13 @@ export type FireCTX = {
 
 export const useFirebase = <G, P>(props: Props<G, P>): UseFirebase<G, P> => {
 
-    const { config, initGame, initPlayer, Loading } = props
+    const { config, init: { game, player }, Loading } = props
 
     const init: State<G, P> = {
-        game: initGame,
+        game,
         owner: null,
         players: {
-            init: initPlayer
+            init: player
         }
     }
 
@@ -54,7 +55,7 @@ export const useFirebase = <G, P>(props: Props<G, P>): UseFirebase<G, P> => {
 
     const { AUTH, DB } = initializeFirebase(config)
 
-    const useRoom = () => {
+    const useRoom = (): UseRoom<G, P> => {
         const { uid } = useContext(FireCTX)
         const data = useContext(DataCTX)
         return {
@@ -93,7 +94,9 @@ export const useFirebase = <G, P>(props: Props<G, P>): UseFirebase<G, P> => {
     })
 
     return [
-        Provider, useRoom, useSet
+        Provider,
+        useRoom,
+        useSet
     ]
 
 }

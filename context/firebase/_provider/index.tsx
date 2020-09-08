@@ -8,9 +8,7 @@ type Props = {
     init: {
         game: any
         owner: string
-        players: {
-            init?: any
-        }
+        players: Record<string, any>
     },
     DataCTX: Context<any>
     FireCTX: Context<FireCTX>
@@ -43,11 +41,13 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
 
             const [room] = Object.values(router.query)
             const Ref = DB.ref(room as string)
+            setRef(Ref)
 
             AUTH.onAuthStateChanged(user => {
                 if (user) {
                     const { uid } = user
-                    Ref.on("value", snap => {
+                    setUID(uid)
+                    Ref.once("value", snap => {
                         const data = snap.val()
                         if (!data) {
                             const initData = {
@@ -58,19 +58,19 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
                                 }
                             }
                             Ref.set(initData)
-                            setData(initData)
                         }
+
                         else {
-                            if (!data.players[uid]) {
-                                Ref.child(`players/${uid}`).set(init.players.init, err => err && console.log(err))
-                                data.players[uid] = init.players.init
-                            }
+                            Ref.child(`players/${uid}`).set(init.players.init, err => err && console.log(err))
+                        }
+
+                        Ref.on("value", snap => {
+                            const data = snap.val()
                             setOwner(data.owner)
                             setData(data)
-                        }
-                    }, err => err && console.log(err))
-                    setUID(uid)
-                    setRef(Ref)
+                        }, err => err && console.log(err))
+
+                    })
                 }
             }, err => err && console.log(err))
         }
