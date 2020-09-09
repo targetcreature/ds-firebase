@@ -11,10 +11,17 @@ type Props<G, P> = {
     Loading?: React.FC
 }
 
-type State<G, P> = {
+export type MetaPlayer = {
+    status: {
+        isActive: boolean
+        isReady: boolean
+    }
+}
+
+export type State<G, P> = {
     game: G,
     owner: string
-    players: Record<string, P>
+    players: Record<string, P & MetaPlayer>
 }
 
 interface UseRoom<G, P> extends State<G, P> {
@@ -25,6 +32,7 @@ interface UseSet<G, P> {
     game: <K extends keyof G>(key: K, cb: (draft: G[K]) => G[K], onComplete?: () => void) => void
     my: <K extends keyof P>(key: K, cb: (draft: P[K]) => P[K], onComplete?: () => void) => void
 }
+
 
 type UseFirebase<G, P> = [
     React.FC,
@@ -46,7 +54,13 @@ export const useFirebase = <G, P>(props: Props<G, P>): UseFirebase<G, P> => {
         game,
         owner: null,
         players: {
-            init: player
+            init: {
+                ...player,
+                status: {
+                    isActive: true,
+                    isReady: false
+                }
+            }
         }
     }
 
