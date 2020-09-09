@@ -15,12 +15,14 @@ export type MetaPlayer = {
     status: {
         isActive: boolean
         isReady: boolean
+        isSpectating: boolean
     }
 }
 
 export type State<G, P> = {
-    game: G,
+    game: G
     owner: string
+    isClosed: boolean
     players: Record<string, P & MetaPlayer>
 }
 
@@ -53,12 +55,14 @@ export const useFirebase = <G, P>(props: Props<G, P>): UseFirebase<G, P> => {
     const init: State<G, P> = {
         game,
         owner: null,
+        isClosed: false,
         players: {
             init: {
                 ...player,
                 status: {
                     isActive: true,
-                    isReady: false
+                    isReady: false,
+                    isSpectating: false
                 }
             }
         }

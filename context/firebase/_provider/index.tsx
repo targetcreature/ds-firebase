@@ -33,9 +33,6 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
 
     const router = useRouter()
 
-    console.log({ uid })
-    console.log({ data })
-
     const isOwner = useMemo(() => !!owner && owner === uid, [owner, uid])
 
     useEffect(() => {
@@ -67,14 +64,9 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
                                 if (!p) return init.players.init
                                 const resume: Props["init"]["players"][0] = { ...p }
                                 resume.status.isActive = true
+                                resume.status.isSpectating = !data.isClosed
                                 return resume
                             }, err => err && console.log(err))
-
-                            if (!data.players[uid]) {
-                            }
-                            else {
-                                console.log("already exists")
-                            }
                         }
 
                         Ref.on("value", snap => {
