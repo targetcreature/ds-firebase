@@ -2,19 +2,18 @@ import { createContext, useContext } from 'react'
 import { _provider } from './components/Provider'
 import { initializeFirebase } from './_bin/initializeFirebase'
 
-type Props<G, P> = {
+type Props<G, P, D> = {
     config: Object
     init: {
         game: G,
         player: P,
+        publicData: D,
     }
     Loading?: React.FC
 }
 
-export type State<G, P> = {
+export type State<G, P, D> = {
     game: G
-    owner: string
-    isClosed: boolean
     players: Record<string, P & {
         status: {
             isActive: boolean
@@ -22,23 +21,28 @@ export type State<G, P> = {
             isSpectating: boolean
         }
     }>
+    publicData: D
+    status: {
+        owner: string
+        isClosed: boolean
+    }
 }
 
-type Player<G, P> = State<G, P>["players"][0]
+type Player<G, P, D> = State<G, P, D>["players"][0]
 
-type UseRoom<G, P> = State<G, P> & {
-    my: Player<G, P>
+type UseRoom<G, P, D> = State<G, P, D> & {
+    my: Player<G, P, D>
 }
 
-interface UseSet<G, P> {
+interface UseSet<G, P, D> {
     game: <K extends keyof G>(key: K, cb: (draft: G[K]) => G[K], onComplete?: () => void) => void
-    my: <K extends keyof Player<G, P>>(key: K, cb: (draft: Player<G, P>[K]) => Player<G, P>[K], onComplete?: () => void) => void
+    my: <K extends keyof Player<G, P, D>>(key: K, cb: (draft: Player<G, P, D>[K]) => Player<G, P, D>[K], onComplete?: () => void) => void
 }
 
-type UseFirebase<G, P> = [
+type UseFirebase<G, P, D> = [
     React.FC,
-    () => UseRoom<G, P>,
-    () => UseSet<G, P>
+    () => UseRoom<G, P, D>,
+    () => UseSet<G, P, D>
 ]
 
 export type FireCTX = {
@@ -47,14 +51,12 @@ export type FireCTX = {
     isOwner: boolean
 }
 
-export const useFirebase = <G, P>(props: Props<G, P>): UseFirebase<G, P> => {
+export const useFirebase = <G, P, D>(props: Props<G, P, D>): UseFirebase<G, P, D> => {
 
-    const { config, init: { game, player }, Loading } = props
+    const { config, init: { game, player, publicData }, Loading } = props
 
-    const init: State<G, P> = {
+    const init: State<G, P, D> = {
         game,
-        owner: null,
-        isClosed: false,
         players: {
             init: {
                 ...player,
@@ -64,7 +66,12 @@ export const useFirebase = <G, P>(props: Props<G, P>): UseFirebase<G, P> => {
                     isSpectating: false
                 }
             }
-        }
+        },
+        publicData,
+        status: {
+            owner: null,
+            isClosed: false,
+        },
     }
 
     const DataCTX = createContext(init)
@@ -72,7 +79,7 @@ export const useFirebase = <G, P>(props: Props<G, P>): UseFirebase<G, P> => {
 
     const { AUTH, DB } = initializeFirebase(config)
 
-    const useRoom = (): UseRoom<G, P> => {
+    const useRoom = (): UseRoom<G, P, D> => {
         const { uid } = useContext(FireCTX)
         const data = useContext(DataCTX)
         return {
@@ -81,7 +88,7 @@ export const useFirebase = <G, P>(props: Props<G, P>): UseFirebase<G, P> => {
         }
     }
 
-    const useSet = (): UseSet<G, P> => {
+    const useSet = (): UseSet<G, P, D> => {
         const { Ref, uid, isOwner } = useContext(FireCTX)
         return {
             game: (key, cb, onComplete?) => {

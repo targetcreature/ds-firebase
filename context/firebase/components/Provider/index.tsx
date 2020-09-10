@@ -5,7 +5,7 @@ import { FireCTX, State } from "../.."
 type Props = {
     AUTH: firebase.auth.Auth
     DB: firebase.database.Database
-    init: State<{}, {}>,
+    init: State<{}, {}, {}>,
     DataCTX: Context<any>
     FireCTX: Context<FireCTX>
     Loading: React.FC
@@ -52,11 +52,15 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
                         if (!data) {
                             const initData = {
                                 ...init,
-                                owner: uid,
                                 players: {
                                     [uid]: init.players.init
+                                },
+                                status: {
+                                    ...init.status,
+                                    owner: uid,
                                 }
                             }
+                            console.log({ initData })
                             Ref.set(initData)
                         }
                         else {
@@ -64,14 +68,14 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
                                 if (!p) return init.players.init
                                 const resume: Props["init"]["players"][0] = { ...p }
                                 resume.status.isActive = true
-                                resume.status.isSpectating = !data.isClosed
+                                resume.status.isSpectating = !data.status.isClosed
                                 return resume
                             }, err => err && console.log(err))
                         }
 
                         Ref.on("value", snap => {
-                            const data = snap.val()
-                            setOwner(data.owner)
+                            const data: Props["init"] = snap.val()
+                            setOwner(data.status.owner)
                             setData(data)
                             setReady(true)
                         }, err => err && console.log(err))
@@ -89,7 +93,7 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
         if (isOwner) {
             const nextOwner = Object.entries(data.players).filter(([key, { status: { isActive } }]) => key !== uid && !!isActive).map(([key]) => key)[0]
             if (nextOwner) {
-                Ref.child("owner").set(nextOwner, (err) => console.log("owner error: ", err))
+                Ref.child("status/owner").set(nextOwner, (err) => console.log("owner error: ", err))
             }
             else {
                 Ref.remove()

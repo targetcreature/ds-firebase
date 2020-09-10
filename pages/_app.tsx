@@ -20,6 +20,9 @@ const init = {
     submission: "",
     vote: 0,
     name: ""
+  },
+  publicData: {
+    fart: "machine"
   }
 }
 
