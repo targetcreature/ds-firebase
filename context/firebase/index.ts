@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react'
-import { _provider } from './provider'
+import { _provider } from './components/Provider'
 import { initializeFirebase } from './_bin/initializeFirebase'
 
 type Props<G, P> = {
@@ -11,30 +11,29 @@ type Props<G, P> = {
     Loading?: React.FC
 }
 
-export type MetaPlayer = {
-    status: {
-        isActive: boolean
-        isReady: boolean
-        isSpectating: boolean
-    }
-}
-
 export type State<G, P> = {
     game: G
     owner: string
     isClosed: boolean
-    players: Record<string, P & MetaPlayer>
+    players: Record<string, P & {
+        status: {
+            isActive: boolean
+            isReady: boolean
+            isSpectating: boolean
+        }
+    }>
 }
 
-interface UseRoom<G, P> extends State<G, P> {
-    my: P
+type Player<G, P> = State<G, P>["players"][0]
+
+type UseRoom<G, P> = State<G, P> & {
+    my: Player<G, P>
 }
 
 interface UseSet<G, P> {
     game: <K extends keyof G>(key: K, cb: (draft: G[K]) => G[K], onComplete?: () => void) => void
-    my: <K extends keyof P>(key: K, cb: (draft: P[K]) => P[K], onComplete?: () => void) => void
+    my: <K extends keyof Player<G, P>>(key: K, cb: (draft: Player<G, P>[K]) => Player<G, P>[K], onComplete?: () => void) => void
 }
-
 
 type UseFirebase<G, P> = [
     React.FC,
@@ -85,7 +84,7 @@ export const useFirebase = <G, P>(props: Props<G, P>): UseFirebase<G, P> => {
     const useSet = (): UseSet<G, P> => {
         const { Ref, uid, isOwner } = useContext(FireCTX)
         return {
-            game: <K extends keyof G>(key: K, cb: (draft: G[K]) => G[K], onComplete?: () => void) => {
+            game: (key, cb, onComplete?) => {
                 if (isOwner) {
                     Ref.child(`game/${key}`).transaction((d) => cb(d), (err) => {
                         if (err) throw err
@@ -93,7 +92,7 @@ export const useFirebase = <G, P>(props: Props<G, P>): UseFirebase<G, P> => {
                     })
                 }
             },
-            my: <K extends keyof P>(key: K, cb: (draft: P[K]) => P[K], onComplete?: () => void) => {
+            my: (key, cb, onComplete?) => {
                 Ref.child(`players/${uid}/${key}`).transaction((d) => cb(d), (err) => {
                     if (err) throw err
                     onComplete && onComplete()

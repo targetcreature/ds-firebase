@@ -1,6 +1,6 @@
 import { useRouter } from "next/router"
 import { Context, useCallback, useEffect, useMemo, useState } from "react"
-import { FireCTX, State } from ".."
+import { FireCTX, State } from "../.."
 
 type Props = {
     AUTH: firebase.auth.Auth
@@ -78,17 +78,18 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
 
                     })
                 }
-            }, err => err && console.log(err))
+            }, err => err && console.log("auth error: ", err))
         }
 
     }, [router])
 
     const onExit = useCallback(() => {
+        Ref.off()
         Ref.child(`players/${uid}/status/isActive`).set(false)
         if (isOwner) {
             const nextOwner = Object.entries(data.players).filter(([key, { status: { isActive } }]) => key !== uid && !!isActive).map(([key]) => key)[0]
             if (nextOwner) {
-                Ref.child("owner").set(nextOwner)
+                Ref.child("owner").set(nextOwner, (err) => console.log("owner error: ", err))
             }
             else {
                 Ref.remove()
