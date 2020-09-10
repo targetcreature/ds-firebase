@@ -15,6 +15,7 @@ type Props<G, P, D> = {
 export type State<G, P, D> = {
     game: G
     players: Record<string, P & {
+        name: string
         status: {
             isActive: boolean
             isReady: boolean
@@ -60,6 +61,7 @@ export const useFirebase = <G, P, D>(props: Props<G, P, D>): UseFirebase<G, P, D
         players: {
             init: {
                 ...player,
+                name: "",
                 status: {
                     isActive: true,
                     isReady: false,

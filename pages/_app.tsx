@@ -17,9 +17,7 @@ const init = {
     turn: 0
   },
   player: {
-    submission: "",
-    vote: 0,
-    name: ""
+    score: 0
   },
   publicData: {
     fart: "machine"
