@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
-import { initializeFirebase } from './bin/initializeFirebase'
-import { _provider } from './_provider'
+import { _provider } from './provider'
+import { initializeFirebase } from './_bin/initializeFirebase'
 
 type Props<G, P> = {
     config: Object
