@@ -1,6 +1,7 @@
 import { useRouter } from "next/router"
 import { Context, useCallback, useEffect, useMemo, useState } from "react"
 import { FireCTX, State } from "../.."
+import { Join } from "../Join"
 
 type Props = {
     AUTH: firebase.auth.Auth
@@ -29,6 +30,7 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
         players: {}
     })
     const [isReady, setReady] = useState(false)
+    const [isJoined, setJoined] = useState(false)
     const [owner, setOwner] = useState(null)
 
     const router = useRouter()
@@ -60,12 +62,12 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
                                     owner: uid,
                                 }
                             }
-                            console.log({ initData })
                             Ref.set(initData)
                         }
                         else {
                             Ref.child(`players/${uid}`).transaction((p) => {
                                 if (!p) return init.players.init
+                                setJoined(true)
                                 const resume: Props["init"]["players"][0] = { ...p }
                                 resume.status.isActive = true
                                 resume.status.isSpectating = !data.status.isClosed
@@ -96,9 +98,10 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
                 Ref.child("status/owner").set(nextOwner, (err) => console.log("owner error: ", err))
             }
             else {
-                Ref.remove()
+                // Ref.remove()
             }
         }
+        AUTH.signOut()
     }, [data.players, isOwner, Ref, uid])
 
     useEffect(() => {
@@ -107,10 +110,17 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
         }
     }, [onExit])
 
+    const handleJoin = useCallback((name: string) => {
+        Ref.child(`players/${uid}/name`).set(name, (err) =>
+            err ? console.log(err) : setJoined(true)
+        )
+    }, [Ref, uid])
+
 
     return !isReady ? <Loading /> : (
         <FireCTX.Provider value={{ uid, Ref, isOwner }}>
             <DataCTX.Provider value={data}>
+                {!isJoined && <Join onClick={handleJoin} />}
                 {children}
             </DataCTX.Provider>
         </FireCTX.Provider>

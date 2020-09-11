@@ -35,7 +35,7 @@ type UseRoom<G, P, D> = State<G, P, D> & {
     my: Player<G, P, D>
 }
 
-interface UseSet<G, P, D> {
+export type UseSet<G, P, D> = {
     game: <K extends keyof G>(key: K, cb: (draft: G[K]) => G[K], onComplete?: () => void) => void
     my: <K extends keyof Player<G, P, D>>(key: K, cb: (draft: Player<G, P, D>[K]) => Player<G, P, D>[K], onComplete?: () => void) => void
 }
