@@ -38,6 +38,7 @@ type UseRoom<G, P, D> = State<G, P, D> & {
 export type UseSet<G, P, D> = {
     game: <K extends keyof G>(key: K, cb: (draft: G[K]) => G[K], onComplete?: () => void) => void
     my: <K extends keyof Player<G, P, D>>(key: K, cb: (draft: Player<G, P, D>[K]) => Player<G, P, D>[K], onComplete?: () => void) => void
+    publicData?: (data: D, onComplete?: () => void) => void
 }
 
 type UseFirebase<G, P, D> = [
@@ -92,7 +93,7 @@ export const useFirebase = <G, P, D>(props: Props<G, P, D>): UseFirebase<G, P, D
 
     const useSet = (): UseSet<G, P, D> => {
         const { Ref, uid, isOwner } = useContext(FireCTX)
-        return {
+        const set: UseSet<G, P, D> = {
             game: (key, cb, onComplete?) => {
                 if (isOwner) {
                     Ref.child(`game/${key}`).transaction((d) => cb(d), (err) => {
@@ -108,6 +109,17 @@ export const useFirebase = <G, P, D>(props: Props<G, P, D>): UseFirebase<G, P, D
                 })
             }
         }
+
+        if (publicData) {
+            set.publicData = (data, onComplete?) => {
+                Ref.child("publicData").set(data, (err) => {
+                    if (err) throw err
+                    onComplete && onComplete()
+                })
+            }
+        }
+
+        return set
     }
 
     const Provider = _provider({
