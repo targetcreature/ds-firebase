@@ -54,7 +54,7 @@ export type FireCTX = {
 
 export const useFirebase = <G, P, D>(props: Props<G, P, D>): UseFirebase<G, P, D> => {
 
-    const { config, init: { game, player, publicData = {} }, Loading } = props
+    const { config, init: { game, player, publicData = null }, Loading } = props
 
     const init: State<G, P, D> = {
         game,
