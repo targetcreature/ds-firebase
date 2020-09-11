@@ -1,12 +1,22 @@
-import { useState } from "react"
+import { useCallback, useState } from "react"
 
 type Props = {
-    onClick: (name: string) => void
+    handler: (name: string) => void
+    isSpectating: boolean
+    playerList: string[]
 }
 
-export const Join: React.FC<Props> = ({ onClick }) => {
+export const Join: React.FC<Props> = ({ handler, isSpectating, playerList }) => {
 
     const [name, setName] = useState("")
+    const [error, setError] = useState("")
+
+    const onClick = useCallback(() => {
+        if (!name) return setError("enter a name dummy")
+        const players = playerList.map((p) => p.toLowerCase())
+        if (players.includes(name.toLowerCase())) return setError("name's taken")
+        handler(name)
+    }, [playerList, handler, name])
 
     return (
         <div className="join_room_wrap"
@@ -21,21 +31,45 @@ export const Join: React.FC<Props> = ({ onClick }) => {
                 alignItems: "center",
                 background: "rgba(0,0,0,0.5)",
             }}>
-            <form className="join_room_body"
+            <div className="join_room_body"
                 style={{
                     padding: "20px",
                     borderRadius: "5px",
-                    background: "white"
-                }}
-                onSubmit={(e) => {
-                    e.preventDefault()
-                    onClick(name)
-                }}
-            >
-                <h2>Enter Name</h2>
-                <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
-                <button type="submit">Join</button>
-            </form>
+                    background: "white",
+                    display: "grid",
+                    justifyItems: "center",
+                    textAlign: "center",
+                    fontFamily: "sans-serif",
+                    gridTemplateRows: "2fr 2fr 1fr 1fr"
+                }}>
+
+                <p>ENTER NAME</p>
+                <form
+                    onSubmit={(e) => {
+                        e.preventDefault()
+                        onClick()
+                    }}
+                >
+                    <input type="text"
+                        style={{
+                            fontSize: "2em",
+                            width: "250px"
+                        }}
+                        value={name} onChange={(e) => {
+                            setError("")
+                            setName(e.target.value)
+                        }} />
+                    <button type="submit"
+                        style={{
+                            marginLeft: "5px",
+                            fontSize: "2em"
+                        }}>
+                        Join
+                            </button>
+                </form>
+                <div className="join_room_error" style={{ color: "red" }}>{error}</div>
+                <div className="join_room_spectator">{isSpectating && "spectator mode"}</div>
+            </div>
         </div>
     )
 

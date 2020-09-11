@@ -31,6 +31,7 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
     })
     const [isReady, setReady] = useState(false)
     const [isJoined, setJoined] = useState(false)
+    const [isSpectating, setSpectating] = useState(false)
     const [owner, setOwner] = useState(null)
 
     const router = useRouter()
@@ -66,7 +67,12 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
                         }
                         else {
                             Ref.child(`players/${uid}`).transaction((p) => {
-                                if (!p) return init.players.init
+                                if (!p) {
+                                    if (data.status.isClosed) setSpectating(true)
+                                    const newPlayer = { ...init.players.init }
+                                    newPlayer.status.isSpectating = !data.status.isClosed
+                                    return newPlayer
+                                }
                                 setJoined(true)
                                 const resume: Props["init"]["players"][0] = { ...p }
                                 resume.status.isActive = true
@@ -116,11 +122,13 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
         )
     }, [Ref, uid])
 
+    const playerList = useMemo(() => Object.values(data.players).map(({ name }) => name), [data.players])
+
 
     return !isReady ? <Loading /> : (
         <FireCTX.Provider value={{ uid, Ref, isOwner }}>
             <DataCTX.Provider value={data}>
-                {!isJoined && <Join onClick={handleJoin} />}
+                {!isJoined && <Join handler={handleJoin} isSpectating={isSpectating} playerList={playerList} />}
                 {children}
             </DataCTX.Provider>
         </FireCTX.Provider>
