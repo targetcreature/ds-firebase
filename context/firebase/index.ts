@@ -7,7 +7,7 @@ type Props<G, P, D> = {
     init: {
         game: G,
         player: P,
-        publicData: D,
+        publicData?: D,
     }
     Loading?: React.FC
 }
@@ -91,9 +91,10 @@ export const useFirebase = <G, P, D>(props: Props<G, P, D>): UseFirebase<G, P, D
         }
     }
 
-    const useSet = (): UseSet<G, P, D> => {
+    const useSet = () => {
         const { Ref, uid, isOwner } = useContext(FireCTX)
-        const set: UseSet<G, P, D> = {
+
+        return {
             game: (key, cb, onComplete?) => {
                 if (isOwner) {
                     Ref.child(`game/${key}`).transaction((d) => cb(d), (err) => {
@@ -107,19 +108,20 @@ export const useFirebase = <G, P, D>(props: Props<G, P, D>): UseFirebase<G, P, D
                     if (err) throw err
                     onComplete && onComplete()
                 })
+            },
+            /* MAKE TRANSACTION */
+            publicData: (data, onComplete?) => {
+                if (!!publicData) {
+                    Ref.child("publicData").set(data, (err) => {
+                        if (err) throw err
+                        onComplete && onComplete()
+                    })
+                }
+                else {
+                    throw new Error("PublicData not initiated")
+                }
             }
         }
-
-        if (publicData) {
-            set.publicData = (data, onComplete?) => {
-                Ref.child("publicData").set(data, (err) => {
-                    if (err) throw err
-                    onComplete && onComplete()
-                })
-            }
-        }
-
-        return set
     }
 
     const Provider = _provider({
