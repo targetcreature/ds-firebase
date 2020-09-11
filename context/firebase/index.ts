@@ -22,7 +22,7 @@ export type State<G, P, D> = {
             isSpectating: boolean
         }
     }>
-    publicData: D
+    publicData?: D | {}
     status: {
         owner: string
         isClosed: boolean
@@ -54,7 +54,7 @@ export type FireCTX = {
 
 export const useFirebase = <G, P, D>(props: Props<G, P, D>): UseFirebase<G, P, D> => {
 
-    const { config, init: { game, player, publicData }, Loading } = props
+    const { config, init: { game, player, publicData = {} }, Loading } = props
 
     const init: State<G, P, D> = {
         game,
