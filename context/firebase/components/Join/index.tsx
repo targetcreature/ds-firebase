@@ -4,9 +4,10 @@ type Props = {
     handler: (name: string) => void
     isSpectating: boolean
     playerList: string[]
+    isNew: boolean
 }
 
-export const Join: React.FC<Props> = ({ handler, isSpectating, playerList }) => {
+export const Join: React.FC<Props> = ({ handler, isSpectating, playerList, isNew }) => {
 
     const [name, setName] = useState("")
     const [error, setError] = useState("")
@@ -40,7 +41,7 @@ export const Join: React.FC<Props> = ({ handler, isSpectating, playerList }) => 
                     justifyItems: "center",
                     textAlign: "center",
                     fontFamily: "sans-serif",
-                    gridTemplateRows: "2fr 2fr 1fr 1fr"
+                    gridTemplateRows: "2fr 2fr 1fr auto"
                 }}>
 
                 <p>ENTER NAME</p>
@@ -59,16 +60,24 @@ export const Join: React.FC<Props> = ({ handler, isSpectating, playerList }) => 
                             setError("")
                             setName(e.target.value)
                         }} />
+                    <br />
                     <button type="submit"
                         style={{
-                            marginLeft: "5px",
-                            fontSize: "2em"
+                            fontSize: "2em",
+                            marginTop: "0.67em"
                         }}>
-                        Join
-                            </button>
+                        {isNew ? "Create Room" : "Join"}
+                    </button>
                 </form>
-                <div className="join_room_error" style={{ color: "red" }}>{error}</div>
-                <div className="join_room_spectator">{isSpectating && "spectator mode"}</div>
+                <div className="join_room_error" style={{
+                    color: "red",
+                    marginTop: "0.67em"
+
+                }}>{error}</div>
+                {
+                    isSpectating &&
+                    <div className="join_room_spectator">spectator mode</div>
+                }
             </div>
         </div>
     )

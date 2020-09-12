@@ -31,6 +31,7 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
     })
     const [isReady, setReady] = useState(false)
     const [isJoined, setJoined] = useState(false)
+    const [isNew, setIsNew] = useState(false)
     const [isSpectating, setSpectating] = useState(false)
     const [owner, setOwner] = useState(null)
 
@@ -53,6 +54,7 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
                     Ref.once("value", snap => {
                         const data: Props["init"] = snap.val()
                         if (!data) {
+                            setIsNew(true)
                             const initData = {
                                 ...init,
                                 players: {
@@ -128,7 +130,7 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
     return !isReady ? <Loading /> : (
         <FireCTX.Provider value={{ uid, Ref, isOwner }}>
             <DataCTX.Provider value={data}>
-                {!isJoined && <Join handler={handleJoin} isSpectating={isSpectating} playerList={playerList} />}
+                {!isJoined && <Join handler={handleJoin} isSpectating={isSpectating} playerList={playerList} isNew={isNew} />}
                 {children}
             </DataCTX.Provider>
         </FireCTX.Provider>
