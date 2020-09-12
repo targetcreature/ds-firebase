@@ -1,3 +1,4 @@
+import produce, { Draft } from "immer"
 import { createContext, useContext } from 'react'
 import { _provider } from './components/Provider'
 import { initializeFirebase } from './_bin/initializeFirebase'
@@ -36,9 +37,9 @@ type UseRoom<G, P, D> = State<G, P, D> & {
 }
 
 export type UseSet<G, P, D> = {
-    game: <K extends keyof G>(key: K, cb: (draft: G[K]) => G[K], onComplete?: () => void) => void
-    my: <K extends keyof Player<G, P, D>>(key: K, cb: (draft: Player<G, P, D>[K]) => Player<G, P, D>[K], onComplete?: () => void) => void
-    publicData?: (cb: (draft: D) => D, onComplete?: () => void) => void
+    game: <K extends keyof G>(key: K, cb: (draft: Draft<G[K]>) => void, onComplete?: () => void) => void
+    my: <K extends keyof Player<G, P, D>>(key: K, cb: (draft: Draft<Player<G, P, D>[K]>) => void, onComplete?: () => void) => void
+    publicData?: (cb: (draft: Draft<Record<string, any> & D>) => void, onComplete?: () => void) => void
 }
 
 type UseFirebase<G, P, D> = [
@@ -97,14 +98,14 @@ export const useFirebase = <G, P, D>(props: Props<G, P, D>): UseFirebase<G, P, D
         return {
             game: (key, cb, onComplete?) => {
                 if (isOwner) {
-                    Ref.child(`game/${key}`).transaction((d) => cb(d), (err) => {
+                    Ref.child(`game/${key}`).transaction((d) => produce(d, (draft) => cb(draft)), (err) => {
                         if (err) throw err
                         onComplete && onComplete()
                     })
                 }
             },
             my: (key, cb, onComplete?) => {
-                Ref.child(`players/${uid}/${key}`).transaction((d) => cb(d), (err) => {
+                Ref.child(`players/${uid}/${key}`).transaction((d) => produce(d, (draft) => cb(draft)), (err) => {
                     if (err) throw err
                     onComplete && onComplete()
                 })
@@ -112,7 +113,7 @@ export const useFirebase = <G, P, D>(props: Props<G, P, D>): UseFirebase<G, P, D
             /* MAKE TRANSACTION */
             publicData: (cb, onComplete?) => {
                 if (!!publicData) {
-                    Ref.child("publicData").transaction((d) => cb(d), (err) => {
+                    Ref.child("publicData").transaction((d) => produce(d, (draft) => cb(draft)), (err) => {
                         if (err) throw err
                         onComplete && onComplete()
                     })
