@@ -19,7 +19,9 @@ const init = {
   player: {
     score: 0
   },
-  publicData: {}
+  publicData: {
+    fart: "machine"
+  }
 }
 
 const Loading: React.FC = () => <div>Loading...</div>

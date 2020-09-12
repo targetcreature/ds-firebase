@@ -38,7 +38,7 @@ type UseRoom<G, P, D> = State<G, P, D> & {
 export type UseSet<G, P, D> = {
     game: <K extends keyof G>(key: K, cb: (draft: G[K]) => G[K], onComplete?: () => void) => void
     my: <K extends keyof Player<G, P, D>>(key: K, cb: (draft: Player<G, P, D>[K]) => Player<G, P, D>[K], onComplete?: () => void) => void
-    publicData?: (data: D, onComplete?: () => void) => void
+    publicData?: (cb: (draft: D) => D, onComplete?: () => void) => void
 }
 
 type UseFirebase<G, P, D> = [
@@ -91,7 +91,7 @@ export const useFirebase = <G, P, D>(props: Props<G, P, D>): UseFirebase<G, P, D
         }
     }
 
-    const useSet = () => {
+    const useSet = (): UseSet<G, P, D> => {
         const { Ref, uid, isOwner } = useContext(FireCTX)
 
         return {
@@ -110,9 +110,9 @@ export const useFirebase = <G, P, D>(props: Props<G, P, D>): UseFirebase<G, P, D
                 })
             },
             /* MAKE TRANSACTION */
-            publicData: (data, onComplete?) => {
+            publicData: (cb, onComplete?) => {
                 if (!!publicData) {
-                    Ref.child("publicData").set(data, (err) => {
+                    Ref.child("publicData").transaction((d) => cb(d), (err) => {
                         if (err) throw err
                         onComplete && onComplete()
                     })
