@@ -1,4 +1,4 @@
-import { useRoom, useSet } from "./_app"
+import { useOwner, useRoom, useSet } from "./_app"
 
 type Props = {
     roomId: string
@@ -8,6 +8,7 @@ const App: React.FC = () => {
 
     const { my, game } = useRoom()
     const set = useSet()
+    const owner = useOwner()
 
     return (
         <div>
@@ -18,6 +19,7 @@ const App: React.FC = () => {
             <button type="button" onClick={() => set.publicData((draft) => {
                 draft.dobby = "dibby"
             })}>Publify</button>
+            <button type="button" onClick={() => owner.startGame()}>Start Game</button>
         </div>
     )
 

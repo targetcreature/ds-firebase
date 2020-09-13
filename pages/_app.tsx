@@ -26,9 +26,9 @@ const init = {
 
 const Loading: React.FC = () => <div>Loading...</div>
 
-const [FirebaseProvider, useRoom, useSet] = useFirebase({ config, init, Loading })
+const [FirebaseProvider, useRoom, useSet, useOwner] = useFirebase({ config, init, Loading })
 
-export { useRoom, useSet }
+export { useRoom, useSet, useOwner }
 
 export default function App({ Component, pageProps }) {
 

@@ -43,10 +43,15 @@ export type UseSet<G, P, D> = {
     publicData?: (cb: (draft: Draft<Record<string, any> & D>) => void, onComplete?: () => void) => void
 }
 
+type UseOwner = {
+    startGame: () => Promise<any> | null
+}
+
 type UseFirebase<G, P, D> = [
     React.FC,
     () => UseRoom<G, P, D>,
-    () => UseSet<G, P, D>
+    () => UseSet<G, P, D>,
+    () => UseOwner
 ]
 
 export type FireCTX = {
@@ -94,6 +99,19 @@ export const useFirebase = <G, P, D>(props: Props<G, P, D>): UseFirebase<G, P, D
         }
     }
 
+    const useOwner = (): UseOwner => {
+        const { Ref, isOwner } = useContext(FireCTX)
+        const set = {
+            startGame: () => Ref.child("status/isOpen").set(false)
+        }
+        return isOwner ? set
+            :
+            Object.keys(set).reduce((prev, key) => ({
+                ...prev,
+                [key]: () => null
+            }), {} as UseOwner)
+    }
+
     const useSet = (): UseSet<G, P, D> => {
         const { Ref, uid, isOwner } = useContext(FireCTX)
 
@@ -139,7 +157,8 @@ export const useFirebase = <G, P, D>(props: Props<G, P, D>): UseFirebase<G, P, D
     return [
         Provider,
         useRoom,
-        useSet
+        useSet,
+        useOwner
     ]
 
 }

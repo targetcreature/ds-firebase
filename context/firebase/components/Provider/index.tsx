@@ -65,9 +65,6 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
                             const initData = {
                                 ...init,
                                 players: null,
-                                // players: {
-                                //     [uid]: init.players.init
-                                // },
                                 status: {
                                     ...init.status,
                                     owner: uid,
@@ -77,11 +74,7 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
                         }
                         else if (Object.keys(data.players).includes(uid)) {
                             setJoined(true)
-                            Ref.child(`players/${uid}`).transaction((p) => {
-                                const resume: Player<{}, {}, {}> = { ...p }
-                                resume.status.isOnline = true
-                                return resume
-                            }, err => err && console.log(err))
+                            Ref.child(`players/${uid}/status/isOnline`).set(true)
                         }
 
                         Ref.on("value", snap => {
@@ -93,8 +86,7 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
 
                         PlayersRef.on("child_added", snap => {
                             const player = snap.val() as Player<{}, {}, {}>
-                            handleNewPlayer(player, snap.ref)
-                            // player.status.isWaiting && handleNewPlayer(player, snap.ref)
+                            player.status.isWaiting && handleNewPlayer(player, snap.ref)
                         })
 
                     })
@@ -133,7 +125,7 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
         Ref.child(`players/${uid}`).set(newPlayer, (err) =>
             err ? console.log(err) : setJoined(true)
         )
-    }, [Ref, uid])
+    }, [Ref, uid, data.status.isOpen])
 
     const playerList = useMemo(() =>
         data.players
