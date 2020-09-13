@@ -11,15 +11,7 @@ const App: React.FC = () => {
 
     return (
         <div>
-            {
-                Object.entries(my).map(([key, val]) =>
-                    key !== "status" &&
-                    <div key={key}>
-                        {key}: {val}
-                    </div>
-                )
-            }
-            <div>Name: {my.name || "No Name"}</div>
+            <div>Name: {my.name}</div>
             <div>Round: {game.round}</div>
             <button type="button" onClick={() => set.my("name", (draft) => draft.replace("a", "!"))}>Nameify</button>
             <button type="button" onClick={() => set.game("round", (n) => n + 1)}>Gameify</button>

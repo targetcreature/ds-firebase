@@ -2,12 +2,11 @@ import { useCallback, useState } from "react"
 
 type Props = {
     handler: (name: string) => void
-    isSpectating: boolean
     playerList: string[]
-    isNew: boolean
+    isOwner: boolean
 }
 
-export const Join: React.FC<Props> = ({ handler, isSpectating, playerList, isNew }) => {
+export const Join: React.FC<Props> = ({ handler, playerList, isOwner }) => {
 
     const [name, setName] = useState("")
     const [error, setError] = useState("")
@@ -32,7 +31,11 @@ export const Join: React.FC<Props> = ({ handler, isSpectating, playerList, isNew
                 alignItems: "center",
                 background: "rgba(0,0,0,0.5)",
             }}>
-            <div className="join_room_body"
+            <form className="join_room_body"
+                onSubmit={(e) => {
+                    e.preventDefault()
+                    onClick()
+                }}
                 style={{
                     padding: "20px",
                     borderRadius: "5px",
@@ -44,41 +47,31 @@ export const Join: React.FC<Props> = ({ handler, isSpectating, playerList, isNew
                     gridTemplateRows: "2fr 2fr 1fr auto"
                 }}>
 
-                <p>ENTER NAME</p>
-                <form
-                    onSubmit={(e) => {
-                        e.preventDefault()
-                        onClick()
-                    }}
-                >
-                    <input type="text"
-                        style={{
-                            fontSize: "2em",
-                            width: "250px"
-                        }}
-                        value={name} onChange={(e) => {
-                            setError("")
-                            setName(e.target.value)
-                        }} />
-                    <br />
-                    <button type="submit"
-                        style={{
-                            fontSize: "2em",
-                            marginTop: "0.67em"
-                        }}>
-                        {isNew ? "Create Room" : "Join"}
-                    </button>
-                </form>
-                <div className="join_room_error" style={{
-                    color: "red",
-                    marginTop: "0.67em"
+                <p>
+                    {
+                        error ? <span className="join_room_error" style={{ color: "red" }}>{error}</span>
+                            :
+                            "ENTER NAME"
+                    }
+                </p>
 
-                }}>{error}</div>
-                {
-                    isSpectating &&
-                    <div className="join_room_spectator">spectator mode</div>
-                }
-            </div>
+                <input type="text"
+                    style={{
+                        fontSize: "2em",
+                        width: "250px"
+                    }}
+                    value={name} onChange={(e) => {
+                        setError("")
+                        setName(e.target.value)
+                    }} />
+                <br />
+                <button type="submit"
+                    style={{
+                        fontSize: "2em",
+                    }}>
+                    {isOwner ? "Create" : "Join"} Room
+                </button>
+            </form>
         </div>
     )
 

@@ -18,19 +18,20 @@ export type State<G, P, D> = {
     players: Record<string, P & {
         name: string
         status: {
-            isActive: boolean
+            isOnline: boolean
             isReady: boolean
             isSpectating: boolean
+            isWaiting: boolean
         }
     }>
     publicData?: D | {}
     status: {
         owner: string
-        isClosed: boolean
+        isOpen: boolean
     }
 }
 
-type Player<G, P, D> = State<G, P, D>["players"][0]
+export type Player<G, P, D> = State<G, P, D>["players"][0]
 
 type UseRoom<G, P, D> = State<G, P, D> & {
     my: Player<G, P, D>
@@ -65,16 +66,17 @@ export const useFirebase = <G, P, D>(props: Props<G, P, D>): UseFirebase<G, P, D
                 ...player,
                 name: "",
                 status: {
-                    isActive: true,
+                    isOnline: true,
                     isReady: false,
-                    isSpectating: false
+                    isSpectating: false,
+                    isWaiting: false
                 }
             }
         },
         publicData,
         status: {
             owner: null,
-            isClosed: false,
+            isOpen: true
         },
     }
 

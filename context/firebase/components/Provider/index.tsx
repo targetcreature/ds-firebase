@@ -1,6 +1,6 @@
 import { useRouter } from "next/router"
 import { Context, useCallback, useEffect, useMemo, useState } from "react"
-import { FireCTX, State } from "../.."
+import { FireCTX, Player, State } from "../.."
 import { Join } from "../Join"
 
 type Props = {
@@ -24,6 +24,7 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
     } = props
 
     const [Ref, setRef] = useState<firebase.database.Reference>(null)
+    const [listeners, setListeners] = useState([])
     const [uid, setUID] = useState<string>(null)
     const [data, setData] = useState<Props["init"]>({
         ...init,
@@ -31,13 +32,17 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
     })
     const [isReady, setReady] = useState(false)
     const [isJoined, setJoined] = useState(false)
-    const [isNew, setIsNew] = useState(false)
-    const [isSpectating, setSpectating] = useState(false)
     const [owner, setOwner] = useState(null)
 
     const router = useRouter()
 
     const isOwner = useMemo(() => !!owner && owner === uid, [owner, uid])
+
+    const pushListener = useCallback((ref) => setListeners((state) => [...state, ref]), [])
+    const handleNewPlayer = useCallback((player: Player<{}, {}, {}>, ref: firebase.database.Reference) => {
+        // if (!isOwner) return
+        console.log({ player })
+    }, [isOwner])
 
     useEffect(() => {
 
@@ -45,7 +50,10 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
 
             const [room] = Object.values(router.query)
             const Ref = DB.ref(room as string)
+            const PlayersRef = Ref.child("players")
             setRef(Ref)
+            pushListener(Ref)
+            pushListener(PlayersRef)
 
             AUTH.onAuthStateChanged(user => {
                 if (user) {
@@ -54,12 +62,12 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
                     Ref.once("value", snap => {
                         const data: Props["init"] = snap.val()
                         if (!data) {
-                            setIsNew(true)
                             const initData = {
                                 ...init,
-                                players: {
-                                    [uid]: init.players.init
-                                },
+                                players: null,
+                                // players: {
+                                //     [uid]: init.players.init
+                                // },
                                 status: {
                                     ...init.status,
                                     owner: uid,
@@ -67,18 +75,11 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
                             }
                             Ref.set(initData)
                         }
-                        else {
+                        else if (Object.keys(data.players).includes(uid)) {
+                            setJoined(true)
                             Ref.child(`players/${uid}`).transaction((p) => {
-                                if (!p) {
-                                    if (data.status.isClosed) setSpectating(true)
-                                    const newPlayer = { ...init.players.init }
-                                    newPlayer.status.isSpectating = !data.status.isClosed
-                                    return newPlayer
-                                }
-                                setJoined(true)
-                                const resume: Props["init"]["players"][0] = { ...p }
-                                resume.status.isActive = true
-                                resume.status.isSpectating = !data.status.isClosed
+                                const resume: Player<{}, {}, {}> = { ...p }
+                                resume.status.isOnline = true
                                 return resume
                             }, err => err && console.log(err))
                         }
@@ -90,6 +91,12 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
                             setReady(true)
                         }, err => err && console.log(err))
 
+                        PlayersRef.on("child_added", snap => {
+                            const player = snap.val() as Player<{}, {}, {}>
+                            handleNewPlayer(player, snap.ref)
+                            // player.status.isWaiting && handleNewPlayer(player, snap.ref)
+                        })
+
                     })
                 }
             }, err => err && console.log("auth error: ", err))
@@ -98,10 +105,10 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
     }, [router])
 
     const onExit = useCallback(() => {
-        Ref.off()
-        Ref.child(`players/${uid}/status/isActive`).set(false)
+        listeners.forEach((ref) => ref.off())
+        Ref.child(`players/${uid}/status/isOnline`).set(false)
         if (isOwner) {
-            const nextOwner = Object.entries(data.players).filter(([key, { status: { isActive } }]) => key !== uid && !!isActive).map(([key]) => key)[0]
+            const nextOwner = Object.entries(data.players).filter(([key, { status: { isOnline } }]) => key !== uid && !!isOnline).map(([key]) => key)[0]
             if (nextOwner) {
                 Ref.child("status/owner").set(nextOwner, (err) => console.log("owner error: ", err))
             }
@@ -110,7 +117,7 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
             }
         }
         AUTH.signOut()
-    }, [data.players, isOwner, Ref, uid])
+    }, [data.players, isOwner, Ref, uid, listeners])
 
     useEffect(() => {
         window.onbeforeunload = () => {
@@ -119,19 +126,34 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
     }, [onExit])
 
     const handleJoin = useCallback((name: string) => {
-        Ref.child(`players/${uid}/name`).set(name, (err) =>
+        const newPlayer = { ...init.players.init }
+        newPlayer.name = name
+        newPlayer.status.isWaiting = !data.status.isOpen
+
+        Ref.child(`players/${uid}`).set(newPlayer, (err) =>
             err ? console.log(err) : setJoined(true)
         )
     }, [Ref, uid])
 
-    const playerList = useMemo(() => Object.values(data.players).map(({ name }) => name), [data.players])
+    const playerList = useMemo(() =>
+        data.players
+            ? Object.values(data.players).map(({ name }) => name)
+            : []
+        , [data.players])
 
 
     return !isReady ? <Loading /> : (
         <FireCTX.Provider value={{ uid, Ref, isOwner }}>
             <DataCTX.Provider value={data}>
-                {!isJoined && <Join handler={handleJoin} isSpectating={isSpectating} playerList={playerList} isNew={isNew} />}
-                {children}
+                {!isJoined ?
+                    <Join
+                        handler={handleJoin}
+                        playerList={playerList}
+                        isOwner={isOwner}
+                    />
+                    :
+                    children
+                }
             </DataCTX.Provider>
         </FireCTX.Provider>
     )
