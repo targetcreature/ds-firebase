@@ -130,7 +130,6 @@ export const useFirebase = <G, P, D>(props: Props<G, P, D>): UseFirebase<G, P, D
                     onComplete && onComplete()
                 })
             },
-            /* MAKE TRANSACTION */
             publicData: (cb, onComplete?) => {
                 if (!!publicData) {
                     Ref.child("publicData").transaction((d) => produce(d, (draft) => cb(draft)), (err) => {

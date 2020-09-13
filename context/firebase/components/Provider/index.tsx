@@ -1,6 +1,6 @@
 import { useRouter } from "next/router"
 import { Context, useCallback, useEffect, useMemo, useState } from "react"
-import { FireCTX, Player, State } from "../.."
+import { FireCTX, State } from "../.."
 import { Join } from "../Join"
 
 type Props = {
@@ -39,10 +39,6 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
     const isOwner = useMemo(() => !!owner && owner === uid, [owner, uid])
 
     const pushListener = useCallback((ref) => setListeners((state) => [...state, ref]), [])
-    const handleNewPlayer = useCallback((player: Player<{}, {}, {}>, ref: firebase.database.Reference) => {
-        // if (!isOwner) return
-        console.log({ player })
-    }, [isOwner])
 
     useEffect(() => {
 
@@ -84,11 +80,6 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
                             setReady(true)
                         }, err => err && console.log(err))
 
-                        PlayersRef.on("child_added", snap => {
-                            const player = snap.val() as Player<{}, {}, {}>
-                            player.status.isWaiting && handleNewPlayer(player, snap.ref)
-                        })
-
                     })
                 }
             }, err => err && console.log("auth error: ", err))
@@ -100,7 +91,7 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
         listeners.forEach((ref) => ref.off())
         Ref.child(`players/${uid}/status/isOnline`).set(false)
         if (isOwner) {
-            const nextOwner = Object.entries(data.players).filter(([key, { status: { isOnline } }]) => key !== uid && !!isOnline).map(([key]) => key)[0]
+            const nextOwner = Object.entries(data.players).filter(([key, { status: { isOnline, isWaiting } }]) => key !== uid && !!isOnline && !isWaiting).map(([key]) => key)[0]
             if (nextOwner) {
                 Ref.child("status/owner").set(nextOwner, (err) => console.log("owner error: ", err))
             }
