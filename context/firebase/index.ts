@@ -2,6 +2,7 @@ import produce, { Draft } from "immer"
 import { createContext, useContext } from 'react'
 import { _provider } from './components/Provider'
 import { initializeFirebase } from './_bin/initializeFirebase'
+import { nullify } from "./_bin/nullify"
 
 type Props<G, P, D> = {
     config: Object
@@ -104,12 +105,7 @@ export const useFirebase = <G, P, D>(props: Props<G, P, D>): UseFirebase<G, P, D
         const set = {
             startGame: () => Ref.child("status/isOpen").set(false)
         }
-        return isOwner ? set
-            :
-            Object.keys(set).reduce((prev, key) => ({
-                ...prev,
-                [key]: () => null
-            }), {} as UseOwner)
+        return isOwner ? set : nullify(set)
     }
 
     const useSet = (): UseSet<G, P, D> => {

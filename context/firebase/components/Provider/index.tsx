@@ -33,6 +33,7 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
     const [isReady, setReady] = useState(false)
     const [isJoined, setJoined] = useState(false)
     const [owner, setOwner] = useState(null)
+    const [roomName, setRoomName] = useState("")
 
     const router = useRouter()
 
@@ -45,6 +46,7 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
         if (router.asPath !== router.route) {
 
             const [room] = Object.values(router.query)
+            setRoomName(room as string)
             const Ref = DB.ref(room as string)
             const PlayersRef = Ref.child("players")
             setRef(Ref)
@@ -133,6 +135,7 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
                         handler={handleJoin}
                         playerList={playerList}
                         isOwner={isOwner}
+                        roomName={roomName}
                     />
                     :
                     children

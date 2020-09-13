@@ -4,17 +4,28 @@ type Props = {
     handler: (name: string) => void
     playerList: string[]
     isOwner: boolean
+    roomName: string
 }
 
-export const Join: React.FC<Props> = ({ handler, playerList, isOwner }) => {
+export const Join: React.FC<Props> = (props) => {
+
+    const {
+        handler,
+        playerList,
+        isOwner,
+        roomName
+    } = props
 
     const [name, setName] = useState("")
     const [error, setError] = useState("")
 
     const onClick = useCallback(() => {
         if (!name) return setError("enter a name dummy")
-        const players = playerList.map((p) => p.toLowerCase())
-        if (players.includes(name.toLowerCase())) return setError("name's taken")
+        const players = playerList.filter((p) => !!p).map((p) => p.toLowerCase())
+        if (players.includes(name.toLowerCase())) {
+            setName("")
+            return setError("name's taken")
+        }
         handler(name)
     }, [playerList, handler, name])
 
@@ -44,18 +55,20 @@ export const Join: React.FC<Props> = ({ handler, playerList, isOwner }) => {
                     justifyItems: "center",
                     textAlign: "center",
                     fontFamily: "sans-serif",
-                    gridTemplateRows: "2fr 2fr 1fr auto"
                 }}>
 
-                <p>
+                <p><b>PLAYERS</b></p>
+                <ul>
                     {
-                        error ? <span className="join_room_error" style={{ color: "red" }}>{error}</span>
-                            :
-                            "ENTER NAME"
+                        playerList.map((p) =>
+                            <li key={p}>{p}</li>
+                        )
                     }
-                </p>
+                </ul>
 
-                <input type="text"
+                <input
+                    type="text"
+                    placeholder={error || "Enter Name"}
                     style={{
                         fontSize: "2em",
                         width: "250px"
