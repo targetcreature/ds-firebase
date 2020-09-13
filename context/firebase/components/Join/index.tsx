@@ -4,7 +4,6 @@ type Props = {
     handler: (name: string) => void
     playerList: string[]
     isOwner: boolean
-    roomName: string
 }
 
 export const Join: React.FC<Props> = (props) => {
@@ -12,8 +11,7 @@ export const Join: React.FC<Props> = (props) => {
     const {
         handler,
         playerList,
-        isOwner,
-        roomName
+        isOwner
     } = props
 
     const [name, setName] = useState("")

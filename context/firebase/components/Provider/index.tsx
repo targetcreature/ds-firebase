@@ -135,7 +135,6 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
                         handler={handleJoin}
                         playerList={playerList}
                         isOwner={isOwner}
-                        roomName={roomName}
                     />
                     :
                     children
