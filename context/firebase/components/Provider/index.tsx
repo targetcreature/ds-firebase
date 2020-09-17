@@ -10,6 +10,9 @@ type Props = {
     DataCTX: Context<any>
     FireCTX: Context<FireCTX>
     Loading: React.FC
+    classNames: {
+        join?: string
+    }
 }
 
 export const _provider = (props: Props): React.FC => ({ children }) => {
@@ -20,7 +23,8 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
         init,
         DataCTX,
         FireCTX,
-        Loading = () => null
+        Loading = () => null,
+        classNames
     } = props
 
     const [Ref, setRef] = useState<firebase.database.Reference>(null)
@@ -139,6 +143,7 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
                         handler={handleJoin}
                         playerList={playerList}
                         isOwner={isOwner}
+                        className={classNames.join}
                     />
                     :
                     children

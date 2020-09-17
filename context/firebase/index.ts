@@ -12,6 +12,9 @@ type Props<G, P, D> = {
         publicData?: D,
     }
     Loading?: React.FC
+    classNames?: {
+        join?: string
+    }
 }
 
 export type State<G, P, D> = {
@@ -63,7 +66,16 @@ export type FireCTX = {
 
 export const useFirebase = <G, P, D>(props: Props<G, P, D>): UseFirebase<G, P, D> => {
 
-    const { firebaseConfig, initState: { game, player, publicData = null }, Loading } = props
+    const {
+        firebaseConfig,
+        initState: {
+            game, player, publicData = null
+        },
+        Loading,
+        classNames = {
+            join: null
+        }
+    } = props
 
     const init: State<G, P, D> = {
         game,
@@ -146,7 +158,8 @@ export const useFirebase = <G, P, D>(props: Props<G, P, D>): UseFirebase<G, P, D
         init,
         DataCTX,
         FireCTX,
-        Loading
+        Loading,
+        classNames
     })
 
     return [

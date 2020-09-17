@@ -8,4 +8,41 @@
     justify-content: center;
     align-items: center;
     background: rgba(0, 0, 0, 0.5);
+    font-family: sans-serif;
+
+    section {
+        display: grid;
+        padding: 20px;
+        border-radius: 5px;
+        background: white;
+        justify-items: center;
+
+        > * {
+            border: 1px solid green;
+        }
+    }
+
+    h1 {
+        margin: 0;
+    }
+    ul {
+        display: grid;
+        grid-template-rows: repeat(3, 1fr);
+        list-style: none;
+        padding: 0;
+    }
+
+    form {
+        display: grid;
+        input,
+        button {
+            font-size: 2em;
+        }
+        input {
+            width: 250px;
+        }
+        button {
+            justify-self: center;
+        }
+    }
 }

@@ -5,6 +5,7 @@ type Props = {
     handler: (name: string) => void
     playerList: string[]
     isOwner: boolean
+    className: string
 }
 
 export const Join: React.FC<Props> = (props) => {
@@ -12,7 +13,8 @@ export const Join: React.FC<Props> = (props) => {
     const {
         handler,
         playerList,
-        isOwner
+        isOwner,
+        className
     } = props
 
     const [name, setName] = useState("")
@@ -29,50 +31,35 @@ export const Join: React.FC<Props> = (props) => {
     }, [playerList, handler, name])
 
     return (
-        <div className={styles.join}>
-            <form className="join_room_body"
-                onSubmit={(e) => {
-                    e.preventDefault()
-                    onClick()
-                }}
-                style={{
-                    padding: "20px",
-                    borderRadius: "5px",
-                    background: "white",
-                    display: "grid",
-                    justifyItems: "center",
-                    textAlign: "center",
-                    fontFamily: "sans-serif",
-                }}>
-
-                <p><b>PLAYERS</b></p>
+        <div className={className || styles.join}>
+            <section>
+                <h1>PLAYERS</h1>
                 <ul>
                     {
                         playerList.map((p, i) =>
-                            <li key={i}>{p}</li>
+                            <li key={i}>{p}{i < playerList.length - 1 && ", "}</li>
                         )
                     }
                 </ul>
-
-                <input
-                    type="text"
-                    placeholder={error || "Enter Name"}
-                    style={{
-                        fontSize: "2em",
-                        width: "250px"
+                <form
+                    onSubmit={(e) => {
+                        e.preventDefault()
+                        onClick()
                     }}
-                    value={name} onChange={(e) => {
-                        setError("")
-                        setName(e.target.value)
-                    }} />
-                <br />
-                <button type="submit"
-                    style={{
-                        fontSize: "2em",
-                    }}>
-                    {isOwner ? "Create" : "Join"} Room
+                >
+
+                    <input
+                        type="text"
+                        placeholder={error || "Enter Name"}
+                        value={name} onChange={(e) => {
+                            setError("")
+                            setName(e.target.value)
+                        }} />
+                    <button type="submit">
+                        {isOwner ? "Create" : "Join"} Room
                 </button>
-            </form>
+                </form>
+            </section>
         </div>
     )
 
