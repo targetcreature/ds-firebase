@@ -70,9 +70,11 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
                             }
                             Ref.set(initData)
                         }
-                        else if (Object.keys(data.players).includes(uid)) {
-                            setJoined(true)
-                            Ref.child(`players/${uid}/status/isOnline`).set(true)
+                        else if (data.players) {
+                            if (Object.keys(data?.players).includes(uid)) {
+                                setJoined(true)
+                                Ref.child(`players/${uid}/status/isOnline`).set(true)
+                            }
                         }
 
                         Ref.on("value", snap => {
@@ -91,7 +93,9 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
 
     const onExit = useCallback(() => {
         listeners.forEach((ref) => ref.off())
-        Ref.child(`players/${uid}/status/isOnline`).set(false)
+        if (isJoined) {
+            Ref.child(`players/${uid}/status/isOnline`).set(false)
+        }
         if (isOwner) {
             const nextOwner = Object.entries(data.players).filter(([key, { status: { isOnline, isWaiting } }]) => key !== uid && !!isOnline && !isWaiting).map(([key]) => key)[0]
             if (nextOwner) {
@@ -102,7 +106,7 @@ export const _provider = (props: Props): React.FC => ({ children }) => {
             }
         }
         AUTH.signOut()
-    }, [data.players, isOwner, Ref, uid, listeners])
+    }, [data.players, isOwner, Ref, uid, listeners, isJoined])
 
     useEffect(() => {
         window.onbeforeunload = () => {

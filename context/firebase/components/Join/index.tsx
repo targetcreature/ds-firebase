@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react"
+import styles from "./styles.module.scss"
 
 type Props = {
     handler: (name: string) => void
@@ -28,18 +29,7 @@ export const Join: React.FC<Props> = (props) => {
     }, [playerList, handler, name])
 
     return (
-        <div className="join_room_wrap"
-            style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100vw",
-                height: "100vh",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                background: "rgba(0,0,0,0.5)",
-            }}>
+        <div className={styles.join}>
             <form className="join_room_body"
                 onSubmit={(e) => {
                     e.preventDefault()
@@ -58,8 +48,8 @@ export const Join: React.FC<Props> = (props) => {
                 <p><b>PLAYERS</b></p>
                 <ul>
                     {
-                        playerList.map((p) =>
-                            <li key={p}>{p}</li>
+                        playerList.map((p, i) =>
+                            <li key={i}>{p}</li>
                         )
                     }
                 </ul>

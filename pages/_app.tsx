@@ -1,6 +1,6 @@
 import { useFirebase } from "../context/firebase"
 
-const config = {
+const firebaseConfig = {
   apiKey: "AIzaSyDZFlZLzy-3RChsZ09-oDkrym60wPS8FxY",
   authDomain: "react-44534.firebaseapp.com",
   databaseURL: "https://react-44534.firebaseio.com",
@@ -11,7 +11,7 @@ const config = {
   measurementId: "G-Z77TJW01CZ"
 }
 
-const init = {
+const initState = {
   game: {
     round: 0,
     turn: 0
@@ -26,7 +26,7 @@ const init = {
 
 const Loading: React.FC = () => <div>Loading...</div>
 
-const [FirebaseProvider, useRoom, useSet, useOwner] = useFirebase({ config, init, Loading })
+const [FirebaseProvider, useRoom, useSet, useOwner] = useFirebase({ firebaseConfig, initState, Loading })
 
 export { useRoom, useSet, useOwner }
 

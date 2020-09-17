@@ -5,8 +5,8 @@ import { initializeFirebase } from './_bin/initializeFirebase'
 import { nullify } from "./_bin/nullify"
 
 type Props<G, P, D> = {
-    config: Object
-    init: {
+    firebaseConfig: Object
+    initState: {
         game: G,
         player: P,
         publicData?: D,
@@ -63,7 +63,7 @@ export type FireCTX = {
 
 export const useFirebase = <G, P, D>(props: Props<G, P, D>): UseFirebase<G, P, D> => {
 
-    const { config, init: { game, player, publicData = null }, Loading } = props
+    const { firebaseConfig, initState: { game, player, publicData = null }, Loading } = props
 
     const init: State<G, P, D> = {
         game,
@@ -89,7 +89,7 @@ export const useFirebase = <G, P, D>(props: Props<G, P, D>): UseFirebase<G, P, D
     const DataCTX = createContext(init)
     const FireCTX = createContext<FireCTX>(null)
 
-    const { AUTH, DB } = initializeFirebase(config)
+    const { AUTH, DB } = initializeFirebase(firebaseConfig)
 
     const useRoom = (): UseRoom<G, P, D> => {
         const { uid } = useContext(FireCTX)
