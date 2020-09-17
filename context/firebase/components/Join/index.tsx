@@ -21,7 +21,7 @@ export const Join: React.FC<Props> = (props) => {
     const [error, setError] = useState("")
 
     const onClick = useCallback(() => {
-        if (!name) return setError("enter a name dummy")
+        if (!name) return setError("need a name dummy")
         const players = playerList.filter((p) => !!p).map((p) => p.toLowerCase())
         if (players.includes(name.toLowerCase())) {
             setName("")
